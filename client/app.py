@@ -42,18 +42,21 @@ def login_attempt():
     user_data = {"username": username, "password": password}
     auth_response = requests.post(AUTH_IP, json=user_data)
 
+    if auth_response.json()['auth'] == 'fail':
+        return auth_response.content
+
     # Creates a SHA256 hash of the password and uses that as the key to
     # decrypt the token form the authentication server
     client_hash_object = SHA256.new(data=password.encode())
     client_key = str(client_hash_object.hexdigest())
-    auth_text = auth_response.content
+    auth_text = auth_response.json()['token']
     decrypted_response = decrypt(auth_text, client_key)
 
     print('client: decrypted with client key as ciphertext {}'
           .format(decrypted_response))
     # Gets the application token from the decrypted authentication token and sends it
     # to the application
-    auth_data = {'cyphertext': decrypted_response.decode('utf-8')}
+    auth_data = {'token': decrypted_response.decode('utf-8')}
     app_response = requests.post(APP_IP, json=auth_data)
     return str(app_response.text)
 

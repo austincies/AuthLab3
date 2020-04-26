@@ -39,7 +39,7 @@ def check_credentials():
 
     encrypted_data = request.json
     print('app server: data received {}'.format(encrypted_data))
-    encrypted_str = encrypted_data['cyphertext']
+    encrypted_str = encrypted_data['token']
     print(encrypted_str)
     print(encrypted_str.encode('utf-8'))
     decrypted = decrypt(encrypted_str.encode('utf-8'), app_server_key)

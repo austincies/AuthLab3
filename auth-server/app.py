@@ -81,14 +81,16 @@ def send_credentials():
         print('auth server: encrypted with client key as ciphertext {}'
               .format(encrypted_client_str))
 
-        return encrypted_client_str
+        return json.dumps({'auth': 'success', 'token': encrypted_client_str.decode('utf-8')})
+    else:
+        return json.dumps({'auth': 'fail', 'token': ''})
 
 
 @app.route('/oauth_dummy_test', methods=['POST'])
 def dummy_server():
     data = request.json
     print('dummy oauth server: data received {}'.format(data))
-    if 'username' in request.json and 'password' in request.json:
+    if 'username' in request.json and 'password' in request.json and request.json['password'] == '123':
         print('dummy oauth server: sending credentials to auth server')
         return '{"auth":"success", "token":"dummy_token"}'
     else:
