@@ -8,7 +8,7 @@ from flask import Flask, request
 import requests
 import json
 
-OAUTH_SERVER = 'http://127.0.0.1:5000/oauth_dummy_test'
+OAUTH_SERVER = 'http://127.0.0.1:5002/oauth_dummy_test'
 
 BLOCK_SIZE = 16
 
@@ -43,7 +43,7 @@ def encrypt(raw, password):
 
 @app.route('/auth', methods=['POST'])
 def send_credentials():
-    user_data = request.json
+    user_data = request.get_json()
     print('auth server: data received {}'.format(user_data))
     password = user_data['password']
 
@@ -88,7 +88,7 @@ def send_credentials():
 def dummy_server():
     data = request.json
     print('dummy oauth server: data received {}'.format(data))
-    if 'user' in request.json and 'password' in request.json:
+    if 'username' in request.json and 'password' in request.json:
         print('dummy oauth server: sending credentials to auth server')
         return '{"auth":"success", "token":"dummy_token"}'
     else:

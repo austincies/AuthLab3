@@ -10,8 +10,10 @@ from Crypto.Hash import SHA256
 client = Flask(__name__)
 client.config["DEBUG"] = True
 
-AUTH_IP = "127.0.0.1:5000/auth" # Will add IP once servers are set up
-APP_IP = "127.0.0.1:5000/app" # Will add IP once servers are set up
+AUTH_IP = "http://127.0.0.1:5002/auth"  # Will add IP once servers are set up
+# Will add IP once servers are set up
+APP_IP = "http://127.0.0.1:5004/app"
+
 
 def unpad(s): return s[:-ord(s[len(s) - 1:])]
 
@@ -28,6 +30,7 @@ def decrypt(enc, password):
 def login():
     return render_template('login.html')
 
+
 @client.route('/', methods=['POST'])
 def login_attempt():
 
@@ -37,20 +40,22 @@ def login_attempt():
 
     # Creates a json token to send to the authentication server
     user_data = {"username": username, "password": password}
-    user_data = json.dumps(user_data)
     auth_response = requests.post(AUTH_IP, json=user_data)
 
-    # Creates a SHA256 hash of the password and uses that as the key to 
+    # Creates a SHA256 hash of the password and uses that as the key to
     # decrypt the token form the authentication server
     client_hash_object = SHA256.new(data=password.encode())
     client_key = str(client_hash_object.hexdigest())
-    decrypted_response = decrypt(auth_response, client_key)
+    auth_text = auth_response.content
+    decrypted_response = decrypt(auth_text, client_key)
 
+    print('client: decrypted with client key as ciphertext {}'
+          .format(decrypted_response))
     # Gets the application token from the decrypted authentication token and sends it
     # to the application
-    auth_data = decrypted_response.json()
-    app_token = auth_data['token']
-    app_response = requests.post(APP_IP, json=app_token)
-    return app_response
+    auth_data = {'cyphertext': decrypted_response.decode('utf-8')}
+    app_response = requests.post(APP_IP, json=auth_data)
+    return str(app_response.text)
+
 
 client.run()
