@@ -42,8 +42,9 @@ def login_attempt():
     user_data = {"username": username, "password": password}
     auth_response = requests.post(AUTH_IP, json=user_data)
 
-    if auth_response.json()['auth'] == 'fail':
-        return auth_response.content
+    try:
+        if auth_response.json()['auth'] == 'fail':
+            return auth_response.content
 
     # Creates a SHA256 hash of the password and uses that as the key to
     # decrypt the token form the authentication server
