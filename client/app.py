@@ -45,6 +45,8 @@ def login_attempt():
     try:
         if auth_response.json()['auth'] == 'fail':
             return auth_response.content
+    except:
+        pass
 
     # Creates a SHA256 hash of the password and uses that as the key to
     # decrypt the token form the authentication server
